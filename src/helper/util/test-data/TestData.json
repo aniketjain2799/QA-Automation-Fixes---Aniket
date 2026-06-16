@@ -1,0 +1,130 @@
+[
+  {
+    "firstName": "Achal",
+    "lastName": "Singh",
+    "userName": "achal@mailinator.com",
+    "password": "Achal@1234",
+    "confirmPassword": "Achal@1234",
+    "EnvironmentName": "TestAutomation",
+    "RBACUserEmail": "achal.dev@mailinator.com",
+    "botNameNew": "New Bot3",
+    "botNameNewPower": "New Bot4",
+    "botNameNewReviewer": "New Bot5",
+    "botRename": "OwnerNewBot",
+    "botRenameDev": "DeveloperNewBot",
+    "botRenameAction": "ActionNewBot",
+    "botRenamePower": "PowerNewBot",
+    "botRenameReviewer": "ReviewerNewBot"
+  },
+  {
+    "phoneNumber": "714-555-1213",
+    "description": "Some description xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "index": 700001,
+    "dataTable": {
+      "Id": 700001,
+      "name": "some name",
+      "address": "some address"
+    }
+  },
+  {
+    "phoneNumber": "714-555-1212",
+    "data": [],
+    "index": 6001
+  },
+  {
+    "phoneNumber": "714-555-1212",
+    "data": [],
+    "index": 6001,
+    "botProperties": {
+      "sender": "A Test Sender1",
+      "recipient": "A Test Recipient1",
+      "subject": "Test Subject1"
+    }
+  },
+  {
+    "count": 0
+  },
+  {
+    "filterName": "metacube",
+    "AStringText": "Some Random Text",
+    "AStringArray": "Some Random String Array Text",
+    "AnInt": "1233456",
+    "PropList1": "ProplistText1",
+    "PropList2": "ProplistText2",
+    "OptPropListInputBox": "optionPropBox"
+  },
+  {
+    "script": "$csvData = @'\nUserPrincipalName,FirstName,LastName,LastReview\nAdeleVance@example.com,Adele,Vance,2020-08-20\nNestorWilke@example.com,Nestor,Wilke,2020-05-18\n'@\n$csvData | ConvertFrom-Csv | Initialize-RbDataTable -PrimaryKey UserPrincipalName"
+  },
+  {
+    "recordCount": 5,
+    "prefix": "NameToday1"
+  },
+  {
+    "newConnectionName": "Achal-Cloud",
+    "newConnectionName1": "Testautomation_Cloud",
+    "newConnectionName2": "Testautomation_windows",
+    "newConnectionName3": "Testautomation_UpdateCloud",
+    "newConnectionName4": "Testautomation_UpdateWindow",
+    "newConnectionUserId": "achal",
+    "newConnectionUserPassword": "Achal@1234",
+    "newConnectionUserId1": "qa-admin",
+    "newConnectionUserPassword1": "Welcome@2024",
+    "updateConnectionName": "Cloud-Lalit",
+    "updateConnectionName1": "Cloud-Lalit1",
+    "updateConnectionName2": "Window-Lalit1",
+    "ScriptPath": "/Environments/Global_Env_Automation/Root/CommandBuilder/MenuValueSelection/Bot1",
+    "ScriptPath1": "/My Workspace/MenuValueSelection/Bot1",
+    "ScriptPath2": "/Team Workspaces/Achal Singh(Developer)/Root/MenuValueSelection/Bot1",
+    "ScriptPath3": "/Environments/Global_Env_Automation/Root/CommandBuilder/MenuValueSelection_PS7_Proxy/Bot1"
+  },
+  {
+    "SecretName": "Random",
+    "SecretDate": "2030-10-22",
+    "ScriptPath": "/Environments/Global_Env_Automation/Root/CommandBuilder/MenuValueSelection/Bot_Param",
+    "ScriptPath1": "/My Workspace/MenuValueSelection/Bot_Param",
+    "ScriptPath2": "/Team Workspaces/Achal Singh(Developer)/Root/MenuValueSelection/Bot_Param",
+    "ScriptPath3": "/Environments/Global_Env_Automation/Root/CommandBuilder/MenuValueSelection_PS7_Proxy/Bot_Param",
+    "rollName": "0dynamic",
+    "rollName1": "01dynamic000",
+    "Script1": "/My Workspace/DynamicUserCreation/dynamicuser",
+    "DyanmicUserEmail": "achal.dynamic@outlook.com",
+    "DyanmicUserEmailL": "lalit.test2@hotmail.com",
+    "Script0": "/Environments/Global_Env_Automation/Root/DynamicUserCreation/dynamicuser"
+  },
+  {
+    "RandomEmailName": "RandomAutomationEmail",
+    "RandomFirstName": "RandomAutomationFirstName",
+    "RandomLastName": "RandomAutomationLastName"
+  },
+  {
+    "mailinatorUrl": "https://www.mailinator.com/",
+    "NewPassword": "Achal@1234",
+    "ConfirmPassword": "Achal@1234",
+    "phoneNumber": "1234567890"
+  },
+  {
+    "name": "DconODBC",
+    "displayName": "DConnector ODBC",
+    "frameworkName": "SQL",
+    "shortName": "SODBC",
+    "vendorName": "VODBC",
+    "productName": "PODBC",
+    "productShortName": "PSODBC",
+    "version": "v1.0"
+  },
+  {
+    "Name": "AutomationUser",
+    "DisplayName": "Automation User"
+  },
+  {
+    "Name11": "SQLQueries",
+    "DisplayName11": "SQL Queries"
+  },
+  {
+    "displayName": "AchalDynamicAtlas",
+    "firstName": "Achal",
+    "lastName": "Dynamic",
+    "businessEmail": "achal.dynamic2025@outlook.com"
+  }
+]

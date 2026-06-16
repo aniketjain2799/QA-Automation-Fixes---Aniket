@@ -1,0 +1,57 @@
+{
+  "name": "play-ts-cucumber",
+  "version": "1.0.0",
+  "description": "Playwright Cucumber TypeScript WebAutomation Framework for Readibots ",
+  "main": "index.js",
+  "scripts": {
+    "*******************************Prod***************************************************": "Test scripts",
+    "debug:prod": "cross-env ENV=prod PWDEBUG=1 DEBUG=pw:api cucumber-js --config=config/cucumber.js",
+    "pretest:prod": "npx ts-node src/helper/report/init.ts",
+    "test:prod": "cross-env ENV=prod FORCE_COLOR=0 cucumber-js --config=config/cucumber.js --retry 1 || true",
+    "posttest:prod": "cross-env ENV=PRODUCTION node generate-report.js",
+    "test:failed:prod": "cucumber-js -p rerun @rerun.txt",
+    "*******************************Staging***************************************************": "Test scripts",
+    "debug:staging": "cross-env ENV=staging PWDEBUG=1 DEBUG=pw:api cucumber-js --config=config/cucumber.js",
+    "pretest:staging": "npx ts-node src/helper/report/init.ts",
+    "test:staging": "cross-env ENV=staging FORCE_COLOR=0 cucumber-js --config=config/cucumber.js --retry 1 || true",
+    "posttest:staging": "cross-env ENV=STAGING node generate-report.js",
+    "test:failed:staging": "cucumber-js -p rerun @rerun.txt",
+    "*******************************DevCU***************************************************": "Test scripts",
+    "debug:devCU": "cross-env ENV=devCU PWDEBUG=1 DEBUG=pw:api cucumber-js --config=config/cucumber.js",
+    "pretest:devCU": "npx ts-node src/helper/report/init.ts",
+    "test:devCU": "cross-env ENV=devCU FORCE_COLOR=0 cucumber-js --config=config/cucumber.js --retry 1 || true",
+    "posttest:devCU": "cross-env ENV=devCU node generate-report.js",
+    "test:failed:devCU": "cucumber-js -p rerun @rerun.txt"
+  },
+  "keywords": [
+    "cucumber",
+    "cucumber - TS",
+    "playwright-cucumber"
+  ],
+  "author": "Achal Singh",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/register": "^7.23.7",
+    "@cucumber/cucumber": "^10.3.1",
+    "@playwright/test": "^1.41.2",
+    "@types/crypto-js": "^4.2.2",
+    "@types/node": "^20.11.16",
+    "cross-env": "^7.0.3",
+    "cucumber-html-reporter": "^7.1.1",
+    "dotenv": "^16.4.2",
+    "fs-extra": "^11.2.0",
+    "monaco-editor": "^0.46.0",
+    "multiple-cucumber-html-reporter": "^3.6.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3",
+    "typings": "^2.1.1",
+    "winston": "^3.11.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "chai": "^5.1.0",
+    "clipboardy": "^4.0.0",
+    "crypto": "^1.0.1",
+    "crypto-js": "^4.2.0"
+  }
+}

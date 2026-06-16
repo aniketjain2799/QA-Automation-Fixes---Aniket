@@ -1,0 +1,821 @@
+generate-report.js
+-------------------------------------------------------------------------------------
+const path = require("path");
+const reporter = require("cucumber-html-reporter");
+const fs = require("fs");
+
+const currentDateTime = new Date().toLocaleString();
+const testEnv = process.env.ENV || "STAGING";
+
+const jsonFileName = process.argv[2] || "cucumber-report.json";
+const htmlFileName = process.argv[3] || "cucumber-report.html";
+
+const jsonFilePath = path.join(process.cwd(), "test-results", jsonFileName);
+const htmlFilePath = path.join(process.cwd(), "test-results", htmlFileName);
+
+// Check if JSON report exists before proceeding
+if (!fs.existsSync(jsonFilePath)) {
+  console.error("Cucumber JSON report not found:", jsonFilePath);
+  process.exit(1);
+}
+
+const options = {
+  theme: "bootstrap",
+  jsonFile: jsonFilePath,
+  output: htmlFilePath,
+  reportSuiteAsScenarios: true,
+  scenarioTimestamp: true,
+  launchReport: true,
+  metadata: {
+    Project: "Readibots",
+    "App Version": "1.0.0",
+    Cycle: "Regression",
+    Browser: "Chrome",
+    "Test Environment": testEnv,
+    Parallel: "Scenarios",
+    Platform: "Ubuntu 24LTS",
+    Executed: "GitHub Cloud",
+    "Report Generated": currentDateTime,
+  },
+  failedSummaryReport: false,
+  brandTitle: "Readibots Test Automation Report",
+  name: "Automation Results",
+};
+
+let reportData;
+try {
+  reportData = JSON.parse(fs.readFileSync(jsonFilePath, "utf-8"));
+} catch (error) {
+  console.error("Error reading Cucumber JSON report:", error);
+  process.exit(1);
+}
+
+let totalScenarios = 0;
+let passedScenarios = 0;
+let failedScenarios = 0;
+
+if (Array.isArray(reportData)) {
+  reportData.forEach((feature) => {
+    if (Array.isArray(feature.elements)) { // Ensure it's an array before iterating
+      feature.elements.forEach((scenario) => {
+        totalScenarios++;
+        const isFailed = scenario.steps.some(
+          (step) => step.result && step.result.status === "failed"
+        );
+        if (isFailed) {
+          failedScenarios++;
+        } else {
+          passedScenarios++;
+        }
+      });
+    }
+  });
+}
+
+// Ensure scenario_counts.txt is saved in Jenkins workspace
+const scenarioCountsPath = path.join(process.cwd(), "scenario_counts.txt");
+const scenarioCountsContent = `Total Scenarios: ${totalScenarios}\nPassed Scenarios: ${passedScenarios}\nFailed Scenarios: ${failedScenarios}\n`;
+
+fs.writeFileSync(scenarioCountsPath, scenarioCountsContent);
+console.log(`Scenario counts saved to: ${scenarioCountsPath}`);
+console.log(`Total: ${totalScenarios}, Passed: ${passedScenarios}, Failed: ${failedScenarios}`);
+
+reporter.generate(options);
+
+---------------------------------------------------------------------------------------------------------------
+
+2.env.properties file should be created at project level
+
+TOTAL_SCENARIOS=4
+PASSED_SCENARIOS=4
+FAILED_SCENARIOS=0
+-----------------------------------------------------------------------------------------------------------------
+
+3.scenario_count.txt file should be created at project level
+
+Total Scenarios: 4
+Passed Scenarios: 4
+Failed Scenarios: 0
+------------------------------------------------------------------------------------------------------------------
+
+
+4.emailbody.txt file should be created at project level
+
+Hi Team,
+
+Please find the Attached Execution Report for Readibots WebAutomation.
+
+Execution Summary:
+
+Total Scenarios: 4
+Passed Scenarios: 4
+Failed Scenarios: 0
+
+Note: Please Download then Open the Report For Better UI Visibility.
+
+Best Regards,
+QA Automation Team
+---------------------------------------------------------------------------------------------------------------
+
+Jenkins
+
+Execute Windows batch command?
+-----------------------------------------------------------------------
+
+@echo off
+
+rem Set environment variables
+set SECRET_KEY=King1207#
+
+rem Run tests
+call npm run test:staging --TAGS="@Critical"
+
+rem Wait until JSON report is generated
+:waitloop
+if not exist test-results\cucumber-report.json (
+    echo Waiting for report to be generated...
+    timeout /t 2 >nul
+    goto waitloop
+)
+
+rem Generate report
+node generate-report.js
+
+rem Ensure scenario_counts.txt exists
+if not exist scenario_counts.txt (
+    echo Total Scenarios: 0 > scenario_counts.txt
+    echo Passed Scenarios: 0 >> scenario_counts.txt
+    echo Failed Scenarios: 0 >> scenario_counts.txt
+)
+
+@echo off
+setlocal enabledelayedexpansion
+
+rem Extract values from scenario_counts.txt
+for /f "tokens=2 delims=:" %%a in ('findstr /c:"Total" "C:\Users\qa-admin\Pictures\QA-Automation\scenario_counts.txt"') do (
+    set TOTAL_SCENARIOS=%%a
+)
+for /f "tokens=2 delims=:" %%a in ('findstr /c:"Passed" "C:\Users\qa-admin\Pictures\QA-Automation\scenario_counts.txt"') do (
+    set PASSED_SCENARIOS=%%a
+)
+for /f "tokens=2 delims=:" %%a in ('findstr /c:"Failed" "C:\Users\qa-admin\Pictures\QA-Automation\scenario_counts.txt"') do (
+    set FAILED_SCENARIOS=%%a
+)
+
+rem Trim spaces
+set TOTAL_SCENARIOS=%TOTAL_SCENARIOS: =%
+set PASSED_SCENARIOS=%PASSED_SCENARIOS: =%
+set FAILED_SCENARIOS=%FAILED_SCENARIOS: =%
+
+rem Store variables globally for Jenkins
+(
+echo TOTAL_SCENARIOS=%TOTAL_SCENARIOS%
+echo PASSED_SCENARIOS=%PASSED_SCENARIOS%
+echo FAILED_SCENARIOS=%FAILED_SCENARIOS%
+) > C:\Users\qa-admin\Pictures\QA-Automation\env.properties
+
+rem Copy latest report to temp_reports AFTER execution completes
+mkdir temp_reports 2>nul
+timeout /t 3 >nul  rem Small delay to ensure report is written
+copy "C:\Users\qa-admin\Pictures\QA-Automation\test-results\cucumber-report.html" temp_reports\
+
+rem Debugging Output
+echo Extracted Values:
+echo TOTAL_SCENARIOS=%TOTAL_SCENARIOS%
+echo PASSED_SCENARIOS=%PASSED_SCENARIOS%
+echo FAILED_SCENARIOS=%FAILED_SCENARIOS%
+
+rem Prepare email body
+(
+echo Hi Team,
+echo.
+echo Please find the Attached Execution Report for Readibots WebAutomation.
+echo.
+echo Execution Summary:
+echo.
+echo Total Scenarios: %TOTAL_SCENARIOS%
+echo Passed Scenarios: %PASSED_SCENARIOS%
+echo Failed Scenarios: %FAILED_SCENARIOS%
+echo.
+echo Note: Please Download then Open the Report For Better UI Visibility.
+echo.
+echo Best Regards,
+echo QA Automation Team
+) > emailbody.txt
+
+rem Send Email
+echo Sending email...
+
+exit 0
+---------------------------------------------------------------------------------------------------------
+
+Execute Windows batch command?
+
+-------------------------------------------------------------------------------------------------
+echo Extracted Values:
+echo TOTAL_SCENARIOS=%TOTAL_SCENARIOS%
+echo PASSED_SCENARIOS=%PASSED_SCENARIOS%
+echo FAILED_SCENARIOS=%FAILED_SCENARIOS%
+echo "Total: %TOTAL_SCENARIOS%, Passed: %PASSED_SCENARIOS%, Failed: %FAILED_SCENARIOS%"
+---------------------------------------------------------------------------------------------------
+
+
+first install this plugin then it will show in Add build step ,Inject environment variables?
+
+Properties File Path
+?
+C:\Users\qa-admin\Pictures\QA-Automation\env.properties
+Properties Content- nothing in it
+
+--------------------------------------------------------------------------------------------------------
+
+Default Content?
+--------------------------------------------------------------------------------------------------------
+<p>Hi Team,</p>
+<p>Please find the Attached Execution Report for Readibots WebAutomation.</p>
+
+<p><b>Execution Summary:</b></p>
+<table border="1">
+<tr>
+<th>Total Scenarios</th>
+<th>Passed Scenarios</th>
+<th>Failed Scenarios</th>
+</tr>
+<tr>
+<td align="center">${TOTAL_SCENARIOS}</td>
+<td align="center">${PASSED_SCENARIOS}</td>
+<td align="center">${FAILED_SCENARIOS}</td>
+</tr>
+</table>
+
+<p><b><em>Note: Please Download then Open the Report For Better UI Visibility.</em></b></p>
+<p>Best Regards</p>
+<p><b>Team Readibots</b></p>
+-----------------------------------------------------------------------------
+Attachments ?
+
+temp_reports/*.html
+-------------------------------------------------------------------------------
+
+Build periodically
+?
+Schedule
+?
+*/15 * * * *   every 15 minutes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------------------
+
+sending result via api in json format
+
+hooks.ts
+----------------
+
+import { BeforeAll, AfterAll, Before, After, Status, setDefaultTimeout } from "@cucumber/cucumber";
+import { Browser, BrowserContext } from "@playwright/test";
+import { fixture } from "./pageFixture";
+import { invokeBrowser } from "../helper/browsers/browserManager";
+import { getEnv } from "../helper/env/env";
+import { createLogger } from "winston";
+import { options } from "../helper/util/logger";
+import * as fs from "fs-extra";
+
+let browser: Browser;
+let context: BrowserContext;
+let scenarioStartTime: number;
+let testResults: any[] = [];
+
+setDefaultTimeout(1200 * 1000);
+
+BeforeAll(async function () {
+    getEnv();
+    browser = await invokeBrowser();
+});
+
+Before({ tags: "not @auth" }, async function ({ pickle }) {
+    scenarioStartTime = performance.now();
+    const scenarioName = pickle.name + pickle.id;
+    context = await browser.newContext({
+        permissions: ["clipboard-read"],
+        recordVideo: {
+            dir: "test-results/videos",
+        },
+    });
+    fixture.context = context;
+    await context.tracing.start({
+        name: scenarioName,
+        title: pickle.name,
+        sources: true,
+        screenshots: true,
+        snapshots: true
+    });
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 1355, height: 629 });
+    fixture.page = page;
+    fixture.logger = createLogger(options(scenarioName));
+});
+
+After(async function ({ pickle, result }) {
+    let img: Buffer;
+    const traceFilePath = `./test-results/trace/${pickle.id}.zip`;
+
+    const scenarioEndTime = performance.now();
+    const scenarioExecutionTime = scenarioEndTime - scenarioStartTime;
+
+    const executionMinutes = Math.floor(scenarioExecutionTime / 60000);
+    const executionSeconds = Math.floor((scenarioExecutionTime % 60000) / 1000);
+    const formattedExecutionTime = `${executionMinutes}m ${executionSeconds.toString().padStart(2, "0")}s`;
+
+    const filePath = "./test-results/testResults.json";
+
+    if (fs.existsSync(filePath)) {
+        testResults = fs.readJsonSync(filePath);
+    }
+
+    const testResult = {
+        testId: testResults.length + 1,
+        name: pickle.name,
+        status: result?.status === Status.PASSED ? "OK" : "FAIL",
+        verified: new Date().toISOString(),
+        executionTime: formattedExecutionTime,
+        subTests: [
+            "Login to Bot Studio",
+            "Create Environment",
+            "Expand Environment",
+            "Create New Folder",
+            "Create Bot Queue and Data Table",
+            "Send a Script in Data Table",
+            "Run Data Table",
+            "Run Service Bot",
+            "Run Bot",
+            "Send Data from Service Bot to Data Table",
+            "Validate Total Data Count"
+        ]
+    };
+
+    testResults.push(testResult);
+    fs.writeJsonSync(filePath, testResults, { spaces: 2 });
+
+    if (result?.status == Status.FAILED) {
+        img = await fixture.page.screenshot({
+            path: `./test-results/screenshots/${pickle.name}.png`, type: "png"
+        });
+        await this.attach(img, "image/png");
+    }
+
+    await context.tracing.stop({ path: traceFilePath });
+    await fixture.page.close();
+    await context.close();
+});
+
+
+
+AfterAll(async function () {
+    await browser.close();
+
+    try {
+        const filePath = "./test-results/testResults.json";
+        let testResults = [];
+
+        if (fs.existsSync(filePath)) {
+            testResults = fs.readJsonSync(filePath);
+        }
+
+        if (testResults.length === 0) {
+            console.log("No test results found. Skipping webhook call.");
+            return;
+        }
+
+        const payload = {
+            timestamp: new Date().toISOString(),
+            environment: process.env.ENV || "STAGING",
+            results: testResults,
+        };
+
+        const apiUrl = "https://webhook.site/fa8a5213-85e1-4197-9bd5-189d3103b61f";
+
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        });
+
+        console.log(`Results sent to webhook. Response status: ${response.status}`);
+    } catch (error) {
+        console.error("Error sending test results to webhook:", error);
+    }
+});
+---------------------------------------------------------------------------------------------
+
+
+if we need screeshot in it, just copy complete path of image and paste it to browser.
+
+----------------------------------
+
+After(async function ({ pickle, result }) {
+    let imgBase64: string | undefined;
+    const traceFilePath = `./test-results/trace/${pickle.id}.zip`;
+
+    const scenarioEndTime = performance.now();
+    const scenarioExecutionTime = scenarioEndTime - scenarioStartTime;
+
+    // Convert execution time to MM:SS format
+    const executionMinutes = Math.floor(scenarioExecutionTime / 60000);
+    const executionSeconds = Math.floor((scenarioExecutionTime % 60000) / 1000);
+    const formattedExecutionTime = `${executionMinutes}m ${executionSeconds.toString().padStart(2, "0")}s`;
+
+    const filePath = "./test-results/testResults.json";
+
+    // **Read existing results before assigning testId**
+    if (fs.existsSync(filePath)) {
+        testResults = fs.readJsonSync(filePath);
+    }
+
+    // Capture failure screenshot if the test failed
+    if (result?.status === Status.FAILED) {
+        const screenshotPath = `./test-results/screenshots/${pickle.name}.png`;
+        await fixture.page.screenshot({ path: screenshotPath, type: "png" });
+
+        // Convert screenshot to Base64
+        const screenshotBuffer = fs.readFileSync(screenshotPath);
+        imgBase64 = screenshotBuffer.toString("base64");
+    }
+
+    const testResult = {
+        testId: testResults.length + 1, // Ensure unique incremental testId
+        name: pickle.name,
+        status: result?.status === Status.PASSED ? "OK" : "FAIL",
+        verified: new Date().toISOString(),
+        executionTime: formattedExecutionTime, // MM:SS format
+        subTests: [
+            "Login to Bot Studio",
+            "Create Environment",
+            "Expand Environment",
+            "Create New Folder",
+            "Create Bot Queue and Data Table",
+            "Send a Script in Data Table",
+            "Run Data Table",
+            "Run Service Bot",
+            "Run Bot",
+            "Send Data to Service Bot Table",
+            "Validate Total Data Count"
+        ], // ✅ Added sub-test details
+        failedScreenshot: imgBase64 ? `data:image/png;base64,${imgBase64}` : undefined // Attach only if failed
+    };
+
+    testResults.push(testResult);
+    fs.writeJsonSync(filePath, testResults, { spaces: 2 });
+
+    await context.tracing.stop({ path: traceFilePath });
+    await fixture.page.close();
+    await context.close();
+});
+-------------------------------------------------------------------------------------------
+
+
+
+
+
+unique Id for each test with rerun functionality
+
+
+import {
+  BeforeAll,
+  AfterAll,
+  Before,
+  After,
+  Status,
+  setDefaultTimeout,
+} from "@cucumber/cucumber";
+import { Browser, BrowserContext } from "@playwright/test";
+import { fixture } from "./pageFixture";
+import { invokeBrowser } from "../helper/browsers/browserManager";
+import { getEnv } from "../helper/env/env";
+import { createLogger } from "winston";
+import { options } from "../helper/util/logger";
+import * as fs from "fs-extra";
+
+let browser: Browser;
+let context: BrowserContext;
+let scenarioStartTime: number;
+let testResults: any[] = [];
+
+setDefaultTimeout(1200 * 1000);
+
+BeforeAll(async function () {
+  getEnv();
+  browser = await invokeBrowser();
+});
+
+Before({ tags: "not @auth" }, async function ({ pickle }) {
+  scenarioStartTime = performance.now();
+  const scenarioName = pickle.name + pickle.id;
+  context = await browser.newContext({
+    permissions: ["clipboard-read"],
+    recordVideo: {
+      dir: "test-results/videos",
+    },
+  });
+  fixture.context = context;
+  await context.tracing.start({
+    name: scenarioName,
+    title: pickle.name,
+    sources: true,
+    screenshots: true,
+    snapshots: true,
+  });
+  const page = await context.newPage();
+  await page.setViewportSize({ width: 1355, height: 629 });
+  fixture.page = page;
+  fixture.logger = createLogger(options(scenarioName));
+});
+
+After(async function ({ pickle, result }) {
+  let img: Buffer;
+  const traceFilePath = `./test-results/trace/${pickle.id}.zip`;
+  const filePath = "./test-results/testResults.json";
+  const idMapPath = "./test-results/testIdMap.json";
+
+  let idMap = fs.existsSync(idMapPath) ? fs.readJsonSync(idMapPath) : {};
+
+  if (!idMap[pickle.name]) {
+    idMap[pickle.name] = Object.keys(idMap).length + 1;
+  }
+  const testId = idMap[pickle.name];
+
+  fs.writeJsonSync(idMapPath, idMap, { spaces: 2 });
+
+  let testResults = fs.existsSync(filePath) ? fs.readJsonSync(filePath) : [];
+
+  const scenarioEndTime = performance.now();
+  const scenarioExecutionTime = scenarioEndTime - scenarioStartTime;
+  const executionMinutes = Math.floor(scenarioExecutionTime / 60000);
+  const executionSeconds = Math.floor((scenarioExecutionTime % 60000) / 1000);
+  const formattedExecutionTime = `${executionMinutes}m ${executionSeconds
+    .toString()
+    .padStart(2, "0")}s`;
+
+  const testResult = {
+    testId: testId,
+    name: pickle.name,
+    status: result?.status === Status.PASSED ? "OK" : "FAIL",
+    verified: new Date().toISOString(),
+    executionTime: formattedExecutionTime,
+  };
+
+  testResults = testResults.filter((t) => t.testId !== testId);
+  testResults.push(testResult);
+  fs.writeJsonSync(filePath, testResults, { spaces: 2 });
+
+  if (result?.status == Status.FAILED) {
+    img = await fixture.page.screenshot({
+      path: `./test-results/screenshots/${pickle.name}.png`,
+      type: "png",
+    });
+    await this.attach(img, "image/png");
+  }
+
+  await context.tracing.stop({ path: traceFilePath });
+  await fixture.page.close();
+  await context.close();
+});
+
+AfterAll(async function () {
+  await browser.close();
+
+  try {
+    const filePath = "./test-results/testResults.json";
+    const idMapPath = "./test-results/testIdMap.json";
+
+    let testResults = fs.existsSync(filePath) ? fs.readJsonSync(filePath) : [];
+
+    if (testResults.length === 0) {
+      console.log("No test results found. Skipping webhook call.");
+      return;
+    }
+
+    let idMap = fs.existsSync(idMapPath) ? fs.readJsonSync(idMapPath) : {};
+
+    console.log("Final Test Results:", testResults);
+    console.log("Test ID Map:", idMap);
+
+    const payload = {
+      timestamp: new Date().toISOString(),
+      environment: process.env.ENV || "STAGING",
+      results: testResults,
+    };
+
+    const apiUrl =
+      "https://cloudbridge.ucclearly.com/storageapi/api/v1/execute/18177b3d-fe5b-4005-8ae9-2fdf6988b076/9a069ffd-412f-44f1-9951-adcf036d3807";
+
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        AuthToken: "avZhA0OpiG9JLQsRg40tkT91T65RRyep",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    console.log(`Results sent to webhook. Response status: ${response.status}`);
+  } catch (error) {
+    console.error("Error sending test results to webhook:", error);
+  }
+});
+
+
+------------------------------------------------------------------------------------------
+
+
+
+
+
+with more details in responce
+
+import {
+  BeforeAll,
+  AfterAll,
+  Before,
+  After,
+  Status,
+  setDefaultTimeout,
+} from "@cucumber/cucumber";
+import { Browser, BrowserContext } from "@playwright/test";
+import { fixture } from "./pageFixture";
+import { invokeBrowser } from "../helper/browsers/browserManager";
+import { getEnv } from "../helper/env/env";
+import { createLogger } from "winston";
+import { options } from "../helper/util/logger";
+import * as fs from "fs-extra";
+
+let browser: Browser;
+let context: BrowserContext;
+let scenarioStartTime: number;
+let testResults: any[] = [];
+
+setDefaultTimeout(1200 * 1000);
+
+BeforeAll(async function () {
+  getEnv();
+  browser = await invokeBrowser();
+});
+
+Before({ tags: "not @auth" }, async function ({ pickle }) {
+  scenarioStartTime = performance.now();
+  const scenarioName = pickle.name + pickle.id;
+  context = await browser.newContext({
+    permissions: ["clipboard-read"],
+    recordVideo: {
+      dir: "test-results/videos",
+    },
+  });
+  fixture.context = context;
+  await context.tracing.start({
+    name: scenarioName,
+    title: pickle.name,
+    sources: true,
+    screenshots: true,
+    snapshots: true,
+  });
+  const page = await context.newPage();
+  await page.setViewportSize({ width: 1355, height: 629 });
+  fixture.page = page;
+  fixture.logger = createLogger(options(scenarioName));
+});
+
+After(async function ({ pickle, result }) {
+  let img: Buffer;
+  const traceFilePath = `./test-results/trace/${pickle.id}.zip`;
+  const filePath = "./test-results/testResults.json";
+  const idMapPath = "./test-results/testIdMap.json";
+
+  let idMap = fs.existsSync(idMapPath) ? fs.readJsonSync(idMapPath) : {};
+
+  if (!idMap[pickle.name]) {
+    idMap[pickle.name] = Object.keys(idMap).length + 1;
+  }
+  const testId = idMap[pickle.name];
+
+  fs.writeJsonSync(idMapPath, idMap, { spaces: 2 });
+
+  let testResults = fs.existsSync(filePath) ? fs.readJsonSync(filePath) : [];
+
+  const scenarioEndTime = performance.now();
+  const scenarioExecutionTime = scenarioEndTime - scenarioStartTime;
+  const executionMinutes = Math.floor(scenarioExecutionTime / 60000);
+  const executionSeconds = Math.floor((scenarioExecutionTime % 60000) / 1000);
+  const formattedExecutionTime = `${executionMinutes}m ${executionSeconds
+    .toString()
+    .padStart(2, "0")}s`;
+
+  const testMetadata: Record<string, { description: string; shortName: string; category: string }> = {
+    "Login to Bot Studio": { description: "Tests the standard login to bot studio", shortName: "BS-0001", category: "LOGIN" },
+    "Create Environment": { description: "Creates a new bot environment", shortName: "ENV-0002", category: "ENVIRONMENT" },
+    "Expand Environment": { description: "Expands an existing bot environment", shortName: "ENV-0003", category: "ENVIRONMENT" },
+    "Create New Folder": { description: "Creates a new folder inside the bot environment", shortName: "FOL-0004", category: "FOLDER" },
+    "Create Bot Queue and Data Table": { description: "Creates a new bot queue and an associated data table", shortName: "BQDT-0005", category: "BOT_QUEUE" },
+    "Send a Script in Data Table": { description: "Sends a script to the data table for execution", shortName: "DT-0006", category: "DATA_TABLE" },
+    "Run Data Table": { description: "Executes the script stored in the data table", shortName: "DT-0007", category: "EXECUTION" },
+    "Run Service Bot": { description: "Runs a service bot to process data", shortName: "SB-0008", category: "BOT_EXECUTION" },
+    "Run Bot": { description: "Runs a standard bot for execution", shortName: "BOT-0009", category: "BOT_EXECUTION" },
+    "Send Data from Service Bot to Data Table and Validate Total Data Count": { description: "Validates that service bot sends correct data", shortName: "DT-0010", category: "DATA_VALIDATION" },
+  };
+
+  const metadata = testMetadata[pickle.name] || { description: "", shortName: "", category: "" };
+
+  const testResult = {
+    testId: testId,
+    name: pickle.name,
+    status: result?.status === Status.PASSED ? "OK" : "FAIL",
+    verified: new Date().toISOString(),
+    executionTime: formattedExecutionTime,
+    description: metadata.description,
+    shortName: metadata.shortName,
+    category: metadata.category,
+  };
+
+  testResults = testResults.filter((t) => t.testId !== testId);
+  testResults.push(testResult);
+  fs.writeJsonSync(filePath, testResults, { spaces: 2 });
+
+  if (result?.status == Status.FAILED) {
+    img = await fixture.page.screenshot({
+      path: `./test-results/screenshots/${pickle.name}.png`,
+      type: "png",
+    });
+    await this.attach(img, "image/png");
+  }
+
+  await context.tracing.stop({ path: traceFilePath });
+  await fixture.page.close();
+  await context.close();
+});
+
+
+AfterAll(async function () {
+  await browser.close();
+
+  try {
+    const filePath = "./test-results/testResults.json";
+    const idMapPath = "./test-results/testIdMap.json";
+
+    let testResults = fs.existsSync(filePath) ? fs.readJsonSync(filePath) : [];
+
+    if (testResults.length === 0) {
+      console.log("No test results found. Skipping webhook call.");
+      return;
+    }
+
+    let idMap = fs.existsSync(idMapPath) ? fs.readJsonSync(idMapPath) : {};
+
+    console.log("Final Test Results:", testResults);
+    console.log("Test ID Map:", idMap);
+
+    const payload = {
+      timestamp: new Date().toISOString(),
+      environment: process.env.ENV || "STAGING",
+      results: testResults,
+    };
+
+    const apiUrl =
+      "https://cloudbridge.ucclearly.com/storageapi/api/v1/execute/18177b3d-fe5b-4005-8ae9-2fdf6988b076/9a069ffd-412f-44f1-9951-adcf036d3807";
+
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        AuthToken: "avZhA0OpiG9JLQsRg40tkT91T65RRyep",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    console.log(`Results sent to webhook. Response status: ${response.status}`);
+  } catch (error) {
+    console.error("Error sending test results to webhook:", error);
+  }
+});
+---------------------------------------------------------------------------------------------------------------------
