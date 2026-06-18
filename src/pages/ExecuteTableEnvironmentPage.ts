@@ -34,9 +34,9 @@ export default class ExecuteTableEnvironmentPage {
     reviewerBotR: "//li[@aria-selected='true']//a[@href='#'][normalize-space()='ReviewerNewBot']",
     deleteOption: "//a[text()='Delete']",
     confirmDeleteButton: "button[id='alertify-ok']",
-    newBotTest2: "//a[@id='38a0c026-da3c-4d65-805e-32649dfc1fce_423763d7-a46c-4067-862a-7d19c822b995_anchor']",
-    newBotTest24: "//a[@id='40323b19-762b-490a-9308-4e8ea8edcac6_3426e80e-a03b-4433-9b9b-13a03b87d896_anchor']",
-    ownerBotR1: "(//a[@href='#'][normalize-space()='OwnerNewBot'])[2]",
+    newBotTest2: "//a[contains(@class,'jstree-anchor') and normalize-space()='NewBotTest2']",
+    newBotTest24: "//a[contains(@class,'jstree-anchor') and normalize-space()='NewBotTest24']",
+    ownerBotR1: "(//a[contains(@class,'jstree-anchor') and normalize-space()='OwnerNewBot'])[1]",
 
   };
 

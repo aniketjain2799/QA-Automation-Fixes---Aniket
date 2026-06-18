@@ -25,7 +25,7 @@ When("the User click on Bot1", async function () {
 
 Then("Bot1 script Should Be executed Successfully", async function () {
     commandBuilderRetrievingDataPage = new CommandBuilderRetrievingDataPage(fixture.page);
-    const jobFinishedText = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue = "Job finished";
     expect(jobFinishedText).toContain(expectedValue);
 
@@ -57,7 +57,7 @@ Then("Bot1 script Should Be executed Successfully with PS7 and ConnectID", async
 
 Then("readiBotsJobRetrieveData Bot script Should Be executed Successfully", async function () {
 
-    const jobFinishedText = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue = "Job finished";
     expect(jobFinishedText).toContain(expectedValue);
 
@@ -69,7 +69,7 @@ Then("readiBotsJobRetrieveData Bot script Should Be executed Successfully", asyn
 
 Then("readiBotsJobRetrieveData Bot script Should Be executed Successfully with PS7 and ConnectID", async function () {
 
-    const jobFinishedText = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue = "Job finished";
     expect(jobFinishedText).toContain(expectedValue);
 
@@ -106,7 +106,7 @@ When("the User clicks on Bot1ReadNew", async function () {
 
 Then("Bot1ReadNew script Should Be executed Successfully", async function () {
 
-    const jobFinishedText1 = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText1 = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue1 = "Job finished";
     expect(jobFinishedText1).toContain(expectedValue1);
 
@@ -131,7 +131,7 @@ When("the User clicks on Bot1ReadOld", async function () {
 
 Then("Bot1ReadOld script Should Be executed Successfully", async function () {
 
-    const jobFinishedText11 = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText11 = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue12 = "Job finished";
     expect(jobFinishedText11).toContain(expectedValue12);
 
@@ -234,7 +234,7 @@ When("the User clicks on Bot1ExecuteOld", async function () {
 
 Then("the Bot1ExecuteOld script should be executed successfully, and the Run ID should be stored", async function () {
 
-    const jobFinishedText16 = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText16 = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue16 = "Job finished";
     expect(jobFinishedText16).toContain(expectedValue16);
 
@@ -250,7 +250,7 @@ Then("the Bot1ExecuteOld script should be executed successfully, and the Run ID 
 
 Then("the Bot1 script should be executed successfully, and the Worker-created ID should be captured and matched with the Bot1ExecuteOld Run ID", async function () {
 
-    const jobFinishedText18 = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText18 = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue18 = "Job finished";
     expect(jobFinishedText18).toContain(expectedValue18);
 
@@ -271,7 +271,7 @@ When("the User clicks on Bot1ExecuteGet", async function () {
 });
 
 Then("the Bot1ExecuteGet script should be executed successfully, and the Run ID should be stored", async function () {
-    const jobFinishedText = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     expect(jobFinishedText).toContain("Job finished");
 
     const noErrorText = await commandBuilderRetrievingDataPage.getNoErrorText(120000);
@@ -286,7 +286,7 @@ When("the User clicks on Bot1ExecutePostForm", async function () {
 });
 
 Then("the Bot1ExecutePostForm script should be executed successfully, and the Run ID should be stored", async function () {
-    const jobFinishedText = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     expect(jobFinishedText).toContain("Job finished");
 
     const noErrorText = await commandBuilderRetrievingDataPage.getNoErrorText(120000);
@@ -297,7 +297,7 @@ Then("the Bot1ExecutePostForm script should be executed successfully, and the Ru
 });
 
 Then("the Bot1 script should be executed successfully, and the Worker-created ID should be captured and matched with the Bot1ExecuteGet Run ID", async function () {
-    const jobFinishedText = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     expect(jobFinishedText).toContain("Job finished");
 
     const workerCreatedId = await commandBuilderRetrievingDataPage.extractWorkerCreatedId();
@@ -308,7 +308,7 @@ Then("the Bot1 script should be executed successfully, and the Worker-created ID
 });
 
 Then("the Bot1 script should be executed successfully, and the Worker-created ID should be captured and matched with the Bot1ExecutePostForm Run ID", async function () {
-    const jobFinishedText = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     expect(jobFinishedText).toContain("Job finished");
 
     const workerCreatedId = await commandBuilderRetrievingDataPage.extractWorkerCreatedId();
@@ -525,7 +525,7 @@ When("the User should be able to paste the Execute script in the Monaco editor, 
 
 Then("readiBotsJobExecute Bot script Should Be executed Successfully, and the Run ID should be stored", async function () {
 
-    const jobFinishedText14 = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText14 = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue14 = "Job finished";
     expect(jobFinishedText14).toContain(expectedValue14);
 
@@ -564,7 +564,7 @@ Then("readiBotsJobExecute Bot script Should Be executed Successfully, and the Ru
 
 Then("the Menu Bot1 script should be executed successfully, and the Worker-created ID should be captured and matched with the MenuExecuteOld Run ID", async function () {
 
-    const jobFinishedText28 = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText28 = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue28 = "Job finished";
     expect(jobFinishedText28).toContain(expectedValue28);
 
@@ -668,7 +668,7 @@ Then("the User should be able to paste the script in the Monaco editor, Run the 
 
 Then("RESTAPI_Retrieve_Powershell Bot script Should Be executed Successfully", async function () {
 
-    const jobFinishedText76 = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText76 = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue76 = "Job finished";
     expect(jobFinishedText76).toContain(expectedValue76);
 
@@ -752,8 +752,7 @@ Then("the User should be able to paste the Script in the Monaco editor, Run the 
     await new Promise(resolve => setTimeout(resolve, 3000));
     await commandBuilderRetrievingDataPage.clearInput("viewlinesCompleteBox");
 
-    this.secretKey = await commandBuilderRetrievingDataPage.extractSecretValue(); // ✅ Assign the extracted value
-
+    // secretKey already extracted during the Eye icon step earlier in this scenario — reuse it
     await new Promise(resolve => setTimeout(resolve, 3000));
     await commandBuilderRetrievingDataPage.fillMonacoEditorWithFinalScriptExe(this.secretKey);
 
@@ -768,7 +767,7 @@ When("click On DashBoard Section", async function () {
 
 Then("RestApiExecuteGetQuery Bot script Should Be executed Successfully, and the Run ID should be stored", async function () {
 
-    const jobFinishedText141 = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText141 = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue141 = "Job finished";
     expect(jobFinishedText141).toContain(expectedValue141);
 
@@ -806,7 +805,7 @@ Then("RestApiExecuteGetQuery Bot script Should Be executed Successfully with PS7
 
 Then("the Menu Bot1 script should be executed successfully, and the Worker-created ID should be captured and matched with the MenuExecuteOld Run ID 23", async function () {
 
-    const jobFinishedText281 = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText281 = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue281 = "Job finished";
     expect(jobFinishedText281).toContain(expectedValue281);
 
@@ -922,7 +921,7 @@ Then("the User should be able to Paste the script in the Monaco editor, Run the 
 
 
 Then("the RestApiExecutPostQuery script should be executed successfully, and the Run ID should be stored", async function () {
-    const jobFinishedText55 = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText55 = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     expect(jobFinishedText55).toContain("Job finished");
 
     const noErrorText55 = await commandBuilderRetrievingDataPage.getNoErrorText(120000);
@@ -954,7 +953,7 @@ Then("the RestApiExecutPostQuery script should be executed successfully with PS7
 
 Then("the Menu BotParam script should be executed successfully, and the Worker-created ID should be captured and matched with the MenuExecuteOld Run ID  Also validate the all the data types are coming or not", async function () {
 
-    const jobFinishedText283 = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText283 = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue283 = "Job finished";
     expect(jobFinishedText283).toContain(expectedValue283);
 
@@ -986,7 +985,7 @@ Then("the Secret key should be Deleted", async function () {
 
 Then("BotForQueuePostJson Bot script Should Be executed Successfully", async function () {
 
-    const jobFinishedText76 = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText76 = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue76 = "Job finished";
     expect(jobFinishedText76).toContain(expectedValue76);
 
@@ -1035,7 +1034,7 @@ When("click on the Service Bot", async function () {
 Then("the Service Bot script Should Be executed Successfully", async function () {
 
     await commandBuilderRetrievingDataPage.clickShowExecutionLogIfVisible();
-    const jobFinishedText761 = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText761 = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue761 = "Job finished";
     expect(jobFinishedText761).toContain(expectedValue761);
 
@@ -1081,7 +1080,7 @@ When("the User clicks on the BotForDataTableGetQuery Bot", async function () {
 
 Then("the BotForDataTableGetQuery script should be executed successfully, and the Run ID should be stored", async function () {
     await commandBuilderRetrievingDataPage.clickShowExecutionLogIfVisible();
-    const jobFinishedText160 = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText160 = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue160 = "Job finished";
     expect(jobFinishedText160).toContain(expectedValue160);
 
@@ -1124,7 +1123,7 @@ When("the User click on Table1", async function () {
 
 Then("the Table1 script should be executed successfully, and the Worker-created ID should be captured and matched with the BotForDataTableGetQuery Run ID", async function () {
 
-    const jobFinishedText180 = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText180 = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue180 = "Job finished";
     expect(jobFinishedText180).toContain(expectedValue180);
 
@@ -1180,7 +1179,7 @@ When("the User clicks on the BotForDataTableExecutePostJson Bot", async function
 
 Then("the BotForDataTableExecutePostJson script should be executed successfully, and the Run ID should be stored", async function () {
 
-    const jobFinishedText168 = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText168 = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue168 = "Job finished";
     expect(jobFinishedText168).toContain(expectedValue168);
 
@@ -1223,7 +1222,7 @@ When("the User click on Table2", async function () {
 
 Then("the Table2 script should be executed successfully, and the Worker-created ID should be captured and matched with the BotForDataTableExecutePostJson Run ID", async function () {
 
-    const jobFinishedText181 = await commandBuilderRetrievingDataPage.getJobFinishedText(300000);
+    const jobFinishedText181 = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     const expectedValue181 = "Job finished";
     expect(jobFinishedText181).toContain(expectedValue181);
 

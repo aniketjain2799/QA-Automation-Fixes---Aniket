@@ -182,19 +182,10 @@ export default class ActionLookupTypesPage {
     }
 
     async clickOnManager() {
-        const xpath1 = 'body > div:nth-child(4) > div:nth-child(30) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(6) > td:nth-child(1) > form:nth-child(1) > span:nth-child(2) > span:nth-child(1) > span:nth-child(1) > ul:nth-child(1)';
-        const xpath2 = 'body > div:nth-child(4) > div:nth-child(29) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(6) > td:nth-child(1) > form:nth-child(1) > span:nth-child(2) > span:nth-child(1) > span:nth-child(1) > ul:nth-child(1)';
-
-        const locator1 = this.page.locator(xpath1);
-        const locator2 = this.page.locator(xpath2);
-
-        if (await locator1.isVisible({ timeout: 2000 })) {
-            await locator1.click();
-        } else if (await locator2.isVisible({ timeout: 2000 })) {
-            await locator2.click();
-        } else {
-            throw new Error('Manager field not found using either XPath');
-        }
+        const selector = "//select[@id='manager']/..//ul[contains(@class,'select2-selection__rendered')]";
+        const locator = this.page.locator(selector);
+        await locator.waitFor({ state: 'visible', timeout: 10000 });
+        await locator.click();
     }
 
 

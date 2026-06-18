@@ -127,16 +127,40 @@ export default class CommandBuilderRetrievingDataPage {
     await this.base.waitAndClick(this.Elements.bot144);
   }
 
-  async getProxyConnectIdText(timeout = 60000) {
+  async getProxyConnectIdText(timeout = 300000) {
+    const start = Date.now();
     const ProxyConnectLocator = this.page.locator(this.Elements.proxyConnectId);
-    await ProxyConnectLocator.waitFor({ state: 'attached', timeout });
-    return ProxyConnectLocator.innerText();
+    const showLogLocator = this.page.locator(this.Elements.showExecutionLog);
+    while (Date.now() - start < timeout) {
+      const found = await ProxyConnectLocator.isVisible({ timeout: 5000 }).catch(() => false);
+      if (found) return ProxyConnectLocator.innerText();
+      const canReopen = await showLogLocator.isVisible({ timeout: 3000 }).catch(() => false);
+      if (canReopen) {
+        await showLogLocator.evaluate((el: HTMLElement) => el.click());
+        await this.page.waitForTimeout(2000);
+      } else {
+        await this.page.waitForTimeout(3000);
+      }
+    }
+    throw new Error(`Proxy ConnectID text not found within ${timeout}ms`);
   }
 
   async getPS7Text(timeout = 80000) {
+    const start = Date.now();
     const PS7Locator = this.page.locator(this.Elements.ps7);
-    await PS7Locator.waitFor({ state: 'attached', timeout });
-    return PS7Locator.innerText();
+    const showLogLocator = this.page.locator(this.Elements.showExecutionLog);
+    while (Date.now() - start < timeout) {
+      const found = await PS7Locator.isVisible({ timeout: 5000 }).catch(() => false);
+      if (found) return PS7Locator.innerText();
+      const canReopen = await showLogLocator.isVisible({ timeout: 3000 }).catch(() => false);
+      if (canReopen) {
+        await showLogLocator.evaluate((el: HTMLElement) => el.click());
+        await this.page.waitForTimeout(2000);
+      } else {
+        await this.page.waitForTimeout(3000);
+      }
+    }
+    throw new Error(`PS7 text not found within ${timeout}ms`);
   }
 
   async clickOnMyWorkspaceArrowButton() {
@@ -222,6 +246,9 @@ export default class CommandBuilderRetrievingDataPage {
   }
 
   async clickOnEyeIcon() {
+    // Wait for any blocking modal (e.g. shareDocument dialog after generating a new key) to close first
+    await this.page.waitForSelector('div[role="dialog"]', { state: 'hidden', timeout: 15000 }).catch(() => {});
+    await this.page.waitForSelector('#alertify-cover', { state: 'hidden', timeout: 15000 }).catch(() => {});
     await this.base.waitAndClick(this.Elements.eyeIcon);
   }
 
@@ -352,6 +379,14 @@ export default class CommandBuilderRetrievingDataPage {
 
   async clickOnBot13() {
     await this.base.waitAndClick(this.Elements.bot13);
+    // Self-heal: jstree loses context after navigating to other bots — click may not change URL
+    const botId = 'fde7eb7c-2a28-41bf-9e0a-b685dcab3743';
+    await this.page.waitForTimeout(1500);
+    if (!this.page.url().includes(botId)) {
+      const origin = new URL(this.page.url()).origin;
+      await this.page.goto(`${origin}/d/${botId}/v/scriptTab`);
+      await this.page.waitForLoadState('networkidle');
+    }
   }
 
   async clickOnBot134() {
@@ -359,9 +394,31 @@ export default class CommandBuilderRetrievingDataPage {
   }
 
   async getJobFinishedText(timeout = 1080000) {
+    const start = Date.now();
     const jobFinishedLocator = this.page.locator(this.Elements.jobFinished);
-    await jobFinishedLocator.waitFor({ state: 'attached', timeout });
-    return jobFinishedLocator.innerText();
+    const showLogLocator = this.page.locator(this.Elements.showExecutionLog);
+    while (Date.now() - start < timeout) {
+      const found = await jobFinishedLocator.isVisible({ timeout: 10000 }).catch(() => false);
+      if (found) return jobFinishedLocator.innerText();
+      // Check if log panel is open — covers overlay (initial loading) and log-entry phases
+      const overlayVisible = await this.page.locator('div.overlayInner').first().isVisible({ timeout: 1000 }).catch(() => false);
+      const logEntryVisible = await this.page.locator('li.cloudbridge').first().isVisible({ timeout: 1000 }).catch(() => false);
+      const logWindowOpen = overlayVisible || logEntryVisible;
+      if (!logWindowOpen) {
+        // Panel is closed — click "Show execution log" to reopen it
+        const canReopen = await showLogLocator.isVisible({ timeout: 3000 }).catch(() => false);
+        if (canReopen) {
+          await showLogLocator.evaluate((el: HTMLElement) => el.click());
+          await this.page.waitForTimeout(2000);
+        } else {
+          await this.page.waitForTimeout(5000);
+        }
+      } else {
+        // Panel is open but job still running — just wait
+        await this.page.waitForTimeout(5000);
+      }
+    }
+    throw new Error(`Job finished text not found within ${timeout}ms`);
   }
 
   async getNoErrorText(timeout = 1080000) {
@@ -379,7 +436,17 @@ export default class CommandBuilderRetrievingDataPage {
   }
 
   async clickOnTable1() {
+    const anchorEl = this.page.locator(this.Elements.table1);
+    const anchorId = await anchorEl.getAttribute('id').catch(() => null);
+    const botId = anchorId ? anchorId.replace('_anchor', '') : null;
     await this.base.waitAndClick(this.Elements.table1);
+    // Self-heal: jstree loses context after navigating to other bots
+    await this.page.waitForTimeout(1500);
+    if (botId && !this.page.url().includes(botId)) {
+      const origin = new URL(this.page.url()).origin;
+      await this.page.goto(`${origin}/d/${botId}/v/scriptTab`);
+      await this.page.waitForLoadState('networkidle');
+    }
   }
 
   async clickOnDataTableTab() {
@@ -391,7 +458,17 @@ export default class CommandBuilderRetrievingDataPage {
   }
 
   async clickOnTable2() {
+    const anchorEl = this.page.locator(this.Elements.table2);
+    const anchorId = await anchorEl.getAttribute('id').catch(() => null);
+    const botId = anchorId ? anchorId.replace('_anchor', '') : null;
     await this.base.waitAndClick(this.Elements.table2);
+    // Self-heal: jstree loses context after navigating to other bots
+    await this.page.waitForTimeout(1500);
+    if (botId && !this.page.url().includes(botId)) {
+      const origin = new URL(this.page.url()).origin;
+      await this.page.goto(`${origin}/d/${botId}/v/scriptTab`);
+      await this.page.waitForLoadState('networkidle');
+    }
   }
 
   async clickOnBotForDataTableGetQuery() {

@@ -24,16 +24,17 @@ export default class ChangeMonitoringPage {
         jobFinished: "(//li[contains(text(), 'Job finished')])[1]",
         noError: "(//li[contains(text(), 'no errors')])[1]",
         tableTab: "(//div[normalize-space()='table'])[1]",
-        tableTabFirstNameVerification: "body > div:nth-child(4) > div:nth-child(3) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > form:nth-child(4) > div:nth-child(1) > div:nth-child(1) > div:nth-child(6) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > table:nth-child(1) > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2)",
+        tableTabFirstNameVerification: "//td[normalize-space()='AdeleVance@example.com']/following-sibling::td[2]",
         newBot: "(//a[normalize-space()='New Bot'])[1]",
         changeMonitoringStarted: "(//li[contains(text(), 'Change monitoring started')])[1]",
         changeMonitoringcompleted: "(//li[contains(text(), 'Change monitoring completed')])[1]",
         view24: "(//div[normalize-space()='View24'])[1]",
         arrowIcon: "//img[@src='/Content/Images/monitoring_change.png']",
-        firstNameVerificationView24: "body > div:nth-child(4) > div:nth-child(3) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > form:nth-child(4) > div:nth-child(1) > div:nth-child(1) > div:nth-child(6) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > table:nth-child(1) > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(4)",
+        firstNameVerificationView24: "//td[normalize-space()='AdeleVance@example.com']/following-sibling::td[3]",
         eng677Bot: "(//a[normalize-space()='ENG-677'])[1]",
         rawData0: "(//div[normalize-space()='Raw Data-0'])[1]",
-        firstNameVerificationRawaData0: "body > div:nth-child(4) > div:nth-child(3) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > form:nth-child(4) > div:nth-child(1) > div:nth-child(1) > div:nth-child(6) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > table:nth-child(1) > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(3)"
+        firstNameVerificationRawaData0: "//td[normalize-space()='AdeleVance@example.com']/following-sibling::td[2]",
+        showExecutionLog: "//span[normalize-space()='Show execution log']"
 
     };
 
@@ -129,27 +130,75 @@ $csvData | ConvertFrom-Csv | Initialize-RbDataTable -PrimaryKey UserPrincipalNam
     }
 
     async getJobFinishedText(timeout = 1080000) {
-        const jobFinishedLocator = this.page.locator(this.Elements.jobFinished);
-        await jobFinishedLocator.waitFor({ state: 'attached', timeout });
-        return jobFinishedLocator.innerText();
+        const start = Date.now();
+        const locator = this.page.locator(this.Elements.jobFinished);
+        const showLogLocator = this.page.locator(this.Elements.showExecutionLog);
+        while (Date.now() - start < timeout) {
+            const found = await locator.isVisible({ timeout: 5000 }).catch(() => false);
+            if (found) return locator.innerText();
+            const canReopen = await showLogLocator.isVisible({ timeout: 3000 }).catch(() => false);
+            if (canReopen) {
+                await showLogLocator.evaluate((el: HTMLElement) => el.click());
+                await this.page.waitForTimeout(2000);
+            } else {
+                await this.page.waitForTimeout(3000);
+            }
+        }
+        throw new Error(`Job finished text not found within ${timeout}ms`);
     }
 
     async getNoErrorText(timeout = 1080000) {
-        const noErrorLocator = this.page.locator(this.Elements.noError);
-        await noErrorLocator.waitFor({ state: 'attached', timeout });
-        return noErrorLocator.innerText();
+        const start = Date.now();
+        const locator = this.page.locator(this.Elements.noError);
+        const showLogLocator = this.page.locator(this.Elements.showExecutionLog);
+        while (Date.now() - start < timeout) {
+            const found = await locator.isVisible({ timeout: 5000 }).catch(() => false);
+            if (found) return locator.innerText();
+            const canReopen = await showLogLocator.isVisible({ timeout: 3000 }).catch(() => false);
+            if (canReopen) {
+                await showLogLocator.evaluate((el: HTMLElement) => el.click());
+                await this.page.waitForTimeout(2000);
+            } else {
+                await this.page.waitForTimeout(3000);
+            }
+        }
+        throw new Error(`No error text not found within ${timeout}ms`);
     }
 
     async getChangeMonitoringStartedText(timeout = 1080000) {
-        const jobFinishedLocator = this.page.locator(this.Elements.changeMonitoringStarted);
-        await jobFinishedLocator.waitFor({ state: 'attached', timeout });
-        return jobFinishedLocator.innerText();
+        const start = Date.now();
+        const locator = this.page.locator(this.Elements.changeMonitoringStarted);
+        const showLogLocator = this.page.locator(this.Elements.showExecutionLog);
+        while (Date.now() - start < timeout) {
+            const found = await locator.isVisible({ timeout: 5000 }).catch(() => false);
+            if (found) return locator.innerText();
+            const canReopen = await showLogLocator.isVisible({ timeout: 3000 }).catch(() => false);
+            if (canReopen) {
+                await showLogLocator.evaluate((el: HTMLElement) => el.click());
+                await this.page.waitForTimeout(2000);
+            } else {
+                await this.page.waitForTimeout(3000);
+            }
+        }
+        throw new Error(`Change monitoring started text not found within ${timeout}ms`);
     }
 
     async getChangeMonitoringcompletedText(timeout = 1080000) {
-        const noErrorLocator = this.page.locator(this.Elements.changeMonitoringcompleted);
-        await noErrorLocator.waitFor({ state: 'attached', timeout });
-        return noErrorLocator.innerText();
+        const start = Date.now();
+        const locator = this.page.locator(this.Elements.changeMonitoringcompleted);
+        const showLogLocator = this.page.locator(this.Elements.showExecutionLog);
+        while (Date.now() - start < timeout) {
+            const found = await locator.isVisible({ timeout: 5000 }).catch(() => false);
+            if (found) return locator.innerText();
+            const canReopen = await showLogLocator.isVisible({ timeout: 3000 }).catch(() => false);
+            if (canReopen) {
+                await showLogLocator.evaluate((el: HTMLElement) => el.click());
+                await this.page.waitForTimeout(2000);
+            } else {
+                await this.page.waitForTimeout(3000);
+            }
+        }
+        throw new Error(`Change monitoring completed text not found within ${timeout}ms`);
     }
 
 
@@ -160,8 +209,10 @@ $csvData | ConvertFrom-Csv | Initialize-RbDataTable -PrimaryKey UserPrincipalNam
 
 
     async getFirstNameFromTable(): Promise<string> {
-        const tableFirstNameElement = await this.page.locator(this.Elements.tableTabFirstNameVerification);
-        return await tableFirstNameElement.innerText();
+        const firstName = ChangeMonitoringPage.generatedFirstName;
+        const locator = this.page.locator(`//td[normalize-space()='${firstName}']`).first();
+        await locator.waitFor({ state: 'visible', timeout: 30000 });
+        return (await locator.innerText()).trim();
     }
 
     async clickOnNewBot() {
@@ -177,8 +228,10 @@ $csvData | ConvertFrom-Csv | Initialize-RbDataTable -PrimaryKey UserPrincipalNam
     }
 
     async getFirstNameFromBot(): Promise<string> {
-        const botFirstNameElement = await this.page.locator(this.Elements.firstNameVerificationView24);
-        return await botFirstNameElement.innerText();
+        const firstName = ChangeMonitoringPage.generatedFirstName;
+        const locator = this.page.locator(`//td[normalize-space()='${firstName}']`).first();
+        await locator.waitFor({ state: 'visible', timeout: 30000 });
+        return (await locator.innerText()).trim();
     }
 
     async clickOnEng677Bot() {
@@ -190,8 +243,10 @@ $csvData | ConvertFrom-Csv | Initialize-RbDataTable -PrimaryKey UserPrincipalNam
     }
 
     async getFirstNameFromENG777Bot(): Promise<string> {
-        const ENG777botFirstNameElement = await this.page.locator(this.Elements.firstNameVerificationRawaData0);
-        return await ENG777botFirstNameElement.innerText();
+        const firstName = ChangeMonitoringPage.generatedFirstName;
+        const locator = this.page.locator(`//td[normalize-space()='${firstName}']`).first();
+        await locator.waitFor({ state: 'visible', timeout: 30000 });
+        return (await locator.innerText()).trim();
     }
 
 }

@@ -354,15 +354,39 @@ export default class RBACPage {
   }
 
   async getJobFinishedText(timeout = 120000) {
+    const start = Date.now();
     const jobFinishedLocator = this.page.locator(this.Elements.jobFinished);
-    await jobFinishedLocator.waitFor({ state: 'attached', timeout });
-    return jobFinishedLocator.innerText();
+    const showLogLocator = this.page.locator(this.Elements.showExecutionLog);
+    while (Date.now() - start < timeout) {
+      const found = await jobFinishedLocator.isVisible({ timeout: 5000 }).catch(() => false);
+      if (found) return jobFinishedLocator.innerText();
+      const canReopen = await showLogLocator.isVisible({ timeout: 3000 }).catch(() => false);
+      if (canReopen) {
+        await showLogLocator.evaluate((el: HTMLElement) => el.click());
+        await this.page.waitForTimeout(2000);
+      } else {
+        await this.page.waitForTimeout(3000);
+      }
+    }
+    throw new Error(`Job finished text not found within ${timeout}ms`);
   }
 
   async getNoErrorText(timeout = 120000) {
+    const start = Date.now();
     const noErrorLocator = this.page.locator(this.Elements.noError);
-    await noErrorLocator.waitFor({ state: 'attached', timeout });
-    return noErrorLocator.innerText();
+    const showLogLocator = this.page.locator(this.Elements.showExecutionLog);
+    while (Date.now() - start < timeout) {
+      const found = await noErrorLocator.isVisible({ timeout: 5000 }).catch(() => false);
+      if (found) return noErrorLocator.innerText();
+      const canReopen = await showLogLocator.isVisible({ timeout: 3000 }).catch(() => false);
+      if (canReopen) {
+        await showLogLocator.evaluate((el: HTMLElement) => el.click());
+        await this.page.waitForTimeout(2000);
+      } else {
+        await this.page.waitForTimeout(3000);
+      }
+    }
+    throw new Error(`No error text not found within ${timeout}ms`);
   }
 
   async getProxyConnectIdText(timeout = 60000) {
@@ -601,15 +625,39 @@ export default class RBACPage {
   }
 
   async getJobFinishedTextRB(newPage, timeout = 120000) {
+    const start = Date.now();
     const jobFinishedLocator = newPage.locator(this.Elements.jobFinished);
-    await jobFinishedLocator.waitFor({ state: 'attached', timeout });
-    return jobFinishedLocator.innerText();
+    const showLogLocator = newPage.locator(this.Elements.showExecutionLog);
+    while (Date.now() - start < timeout) {
+      const found = await jobFinishedLocator.isVisible({ timeout: 5000 }).catch(() => false);
+      if (found) return jobFinishedLocator.innerText();
+      const canReopen = await showLogLocator.isVisible({ timeout: 3000 }).catch(() => false);
+      if (canReopen) {
+        await showLogLocator.evaluate((el: HTMLElement) => el.click());
+        await newPage.waitForTimeout(2000);
+      } else {
+        await newPage.waitForTimeout(3000);
+      }
+    }
+    throw new Error(`Job finished text not found within ${timeout}ms`);
   }
 
   async getNoErrorTextRB(newPage, timeout = 120000) {
+    const start = Date.now();
     const noErrorLocator = newPage.locator(this.Elements.noError);
-    await noErrorLocator.waitFor({ state: 'attached', timeout });
-    return noErrorLocator.innerText();
+    const showLogLocator = newPage.locator(this.Elements.showExecutionLog);
+    while (Date.now() - start < timeout) {
+      const found = await noErrorLocator.isVisible({ timeout: 5000 }).catch(() => false);
+      if (found) return noErrorLocator.innerText();
+      const canReopen = await showLogLocator.isVisible({ timeout: 3000 }).catch(() => false);
+      if (canReopen) {
+        await showLogLocator.evaluate((el: HTMLElement) => el.click());
+        await newPage.waitForTimeout(2000);
+      } else {
+        await newPage.waitForTimeout(3000);
+      }
+    }
+    throw new Error(`No error text not found within ${timeout}ms`);
   }
 
   async clickOnRawData0RB(page: Page) {

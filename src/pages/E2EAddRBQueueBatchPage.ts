@@ -55,15 +55,39 @@ export default class AddRBQueueBatchPage {
     }
 
     async getJobFinishedText(timeout = 1080000) {
+        const start = Date.now();
         const jobFinishedLocator = this.page.locator(this.Elements.jobFinished);
-        await jobFinishedLocator.waitFor({ state: 'attached', timeout });
-        return jobFinishedLocator.innerText();
+        const showLogLocator = this.page.locator(this.Elements.showExecutionLog);
+        while (Date.now() - start < timeout) {
+            const found = await jobFinishedLocator.isVisible({ timeout: 5000 }).catch(() => false);
+            if (found) return jobFinishedLocator.innerText();
+            const canReopen = await showLogLocator.isVisible({ timeout: 3000 }).catch(() => false);
+            if (canReopen) {
+                await showLogLocator.evaluate((el: HTMLElement) => el.click());
+                await this.page.waitForTimeout(2000);
+            } else {
+                await this.page.waitForTimeout(3000);
+            }
+        }
+        throw new Error(`Job finished text not found within ${timeout}ms`);
     }
 
     async getNoErrorText(timeout = 1080000) {
+        const start = Date.now();
         const noErrorLocator = this.page.locator(this.Elements.noError);
-        await noErrorLocator.waitFor({ state: 'attached', timeout });
-        return noErrorLocator.innerText();
+        const showLogLocator = this.page.locator(this.Elements.showExecutionLog);
+        while (Date.now() - start < timeout) {
+            const found = await noErrorLocator.isVisible({ timeout: 5000 }).catch(() => false);
+            if (found) return noErrorLocator.innerText();
+            const canReopen = await showLogLocator.isVisible({ timeout: 3000 }).catch(() => false);
+            if (canReopen) {
+                await showLogLocator.evaluate((el: HTMLElement) => el.click());
+                await this.page.waitForTimeout(2000);
+            } else {
+                await this.page.waitForTimeout(3000);
+            }
+        }
+        throw new Error(`No error text not found within ${timeout}ms`);
     }
 
     async getFirstRecord() {
@@ -98,15 +122,39 @@ export default class AddRBQueueBatchPage {
 
 
     async getPS7Text(timeout = 80000) {
+        const start = Date.now();
         const PS7Locator = this.page.locator(this.Elements.ps7);
-        await PS7Locator.waitFor({ state: 'attached', timeout });
-        return PS7Locator.innerText();
+        const showLogLocator = this.page.locator(this.Elements.showExecutionLog);
+        while (Date.now() - start < timeout) {
+            const found = await PS7Locator.isVisible({ timeout: 5000 }).catch(() => false);
+            if (found) return PS7Locator.innerText();
+            const canReopen = await showLogLocator.isVisible({ timeout: 3000 }).catch(() => false);
+            if (canReopen) {
+                await showLogLocator.evaluate((el: HTMLElement) => el.click());
+                await this.page.waitForTimeout(2000);
+            } else {
+                await this.page.waitForTimeout(3000);
+            }
+        }
+        throw new Error(`PS7 text not found within ${timeout}ms`);
     }
 
     async getProxyConnectIdText(timeout = 180000) {
+        const start = Date.now();
         const ProxyConnectLocator = this.page.locator(this.Elements.proxyConnectId);
-        await ProxyConnectLocator.waitFor({ state: 'attached', timeout });
-        return ProxyConnectLocator.innerText();
+        const showLogLocator = this.page.locator(this.Elements.showExecutionLog);
+        while (Date.now() - start < timeout) {
+            const found = await ProxyConnectLocator.isVisible({ timeout: 5000 }).catch(() => false);
+            if (found) return ProxyConnectLocator.innerText();
+            const canReopen = await showLogLocator.isVisible({ timeout: 3000 }).catch(() => false);
+            if (canReopen) {
+                await showLogLocator.evaluate((el: HTMLElement) => el.click());
+                await this.page.waitForTimeout(2000);
+            } else {
+                await this.page.waitForTimeout(3000);
+            }
+        }
+        throw new Error(`Proxy ConnectID text not found within ${timeout}ms`);
     }
 
 }
