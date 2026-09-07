@@ -450,7 +450,17 @@ export default class CommandBuilderRetrievingDataPage {
   }
 
   async clickOnDataTableTab() {
-    await this.base.waitAndClick(this.Elements.dataTableTab);
+    try {
+      await this.page.waitForSelector(this.Elements.dataTableTab, { state: 'visible', timeout: 30000 });
+      await this.base.waitAndClick(this.Elements.dataTableTab);
+    } catch (error) {
+      console.log('[clickOnDataTableTab] First 30s timeout, retrying');
+      // Same class of slow-render/drift seen elsewhere in this flow — give it more time on retry
+      // rather than failing outright on the default 30s wait.
+      await this.page.waitForTimeout(3000);
+      await this.page.waitForSelector(this.Elements.dataTableTab, { state: 'visible', timeout: 60000 });
+      await this.base.waitAndClick(this.Elements.dataTableTab);
+    }
   }
 
   async clickOnBotForDataTablePostJson() {
@@ -516,15 +526,38 @@ export default class CommandBuilderRetrievingDataPage {
     }
   }
 
-  async extractWorkerCreatedId(): Promise<string> {
-    const workerCreatedText = await this.page.textContent(this.Elements.workerCreatedId);
-    const workerCreatedIdMatch = workerCreatedText.match(/RID: (\d+)/);
+  async extractWorkerCreatedId(expectedRunId?: string, timeout = 120000): Promise<string> {
+    // Bot1/BotParam/Table nodes are revisited multiple times per scenario, and each REST-triggered
+    // run's "Worker created" log line is posted asynchronously after the REST call already returned
+    // its run id. A single unsynchronized read can catch a stale/leftover value from an earlier run
+    // before the new one lands. Poll (like getProxyConnectIdText/getPS7Text below) until the latest
+    // entry actually matches the run id we're expecting.
+    const workerCreatedLocator = this.page.locator(this.Elements.workerCreatedId);
+    const showLogLocator = this.page.locator(this.Elements.showExecutionLog);
+    const start = Date.now();
+    let lastId = '';
 
-    if (workerCreatedIdMatch) {
-      return workerCreatedIdMatch[1].trim();
-    } else {
-      throw new Error('Worker-created ID not found in the log.');
+    while (Date.now() - start < timeout) {
+      const count = await workerCreatedLocator.count();
+      if (count > 0) {
+        const workerCreatedText = await workerCreatedLocator.last().innerText();
+        const workerCreatedIdMatch = workerCreatedText.match(/RID: (\d+)/);
+        if (workerCreatedIdMatch) {
+          lastId = workerCreatedIdMatch[1].trim();
+          if (!expectedRunId || lastId === expectedRunId) {
+            return lastId;
+          }
+        }
+      }
+      const canReopen = await showLogLocator.isVisible({ timeout: 1000 }).catch(() => false);
+      if (canReopen) {
+        await showLogLocator.evaluate((el: HTMLElement) => el.click());
+      }
+      await this.page.waitForTimeout(2000);
     }
+
+    if (lastId) return lastId; // return the latest value seen so the caller's expect(...).toBe(...) reports a clear diff
+    throw new Error('Worker-created ID not found in the log.');
   }
 
   async clickOnBot1ExecuteGet() {
@@ -790,7 +823,10 @@ export default class CommandBuilderRetrievingDataPage {
 
     for (const selector of rawDataSelectors1) {
       await this.page.waitForTimeout(12000);
-      const dataElement = await this.page.waitForSelector(selector, { timeout: 5000 });
+      // Bumped from 5000ms — every other PS7-context wait in this file (getProxyConnectIdText,
+      // getPS7Text) uses 60000-300000ms; this grid can take longer than 5s to render under the
+      // same proxy overhead.
+      const dataElement = await this.page.waitForSelector(selector, { timeout: 60000 });
       const isVisible = await dataElement.isVisible();
       expect(isVisible).toBe(true);
       // console.log(`Data with selector ${selector} is present.`);

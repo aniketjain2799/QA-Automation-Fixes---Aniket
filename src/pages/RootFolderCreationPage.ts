@@ -292,6 +292,10 @@ export default class RootFolderCreationPage {
   async enterBotReNameForChange(botName4: string) {
     await this.page.fill(this.Elements.newBotNameChange, ""); // Clear the input field
     await this.page.fill(this.Elements.newBotNameChange, botName4);
+    // fill() alone doesn't commit the rename — the tree's inline-edit input needs an explicit
+    // Enter to save, matching the confirm-with-Enter pattern used elsewhere in this codebase
+    // (e.g. 7ValidationRulesVerificationPage.ts) for similar typed-value confirmations.
+    await this.page.keyboard.press('Enter');
     await this.page.waitForTimeout(2000)
   }
 

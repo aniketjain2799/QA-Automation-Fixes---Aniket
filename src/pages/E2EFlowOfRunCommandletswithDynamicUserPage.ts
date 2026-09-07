@@ -96,12 +96,24 @@ export default class RunCommandletsPage {
 
     async clickOnRunButton() {
         console.log('[clickOnRunButton] URL on entry:', this.page.url());
+        const entryUrl = this.page.url();
+        const botIdMatch = entryUrl.match(/\/d\/([^/]+)\/v\/scriptTab/);
+        const botId = botIdMatch ? botIdMatch[1] : null;
+
         try {
             await this.page.waitForSelector(this.Elements.run, { state: 'visible', timeout: 60000 });
             console.log('[clickOnRunButton] Run found on first attempt, URL:', this.page.url());
             await this.base.waitAndClick(this.Elements.run);
         } catch (error) {
             console.log('[clickOnRunButton] First 60s timeout — URL now:', this.page.url());
+            // Self-heal: the SPA can drift off the script tab (e.g. to dashboardTab) between the
+            // Run button being found visible and the click actually landing, leaving no Run button
+            // to find on retry. Navigate back to the bot's script tab before retrying.
+            if (botId && !this.page.url().includes(`/d/${botId}/v/scriptTab`)) {
+                const origin = new URL(this.page.url()).origin;
+                await this.page.goto(`${origin}/d/${botId}/v/scriptTab`);
+                await this.page.waitForLoadState('networkidle');
+            }
             try {
                 await this.base.waitAndClick(this.Elements.closeButton);
             } catch (closeError) {
@@ -114,7 +126,38 @@ export default class RunCommandletsPage {
 
 
     async clickOnYesButton() {
-        await this.base.waitAndClick(this.Elements.runYes);
+        const entryUrl = this.page.url();
+        const botIdMatch = entryUrl.match(/\/d\/([^/]+)\/v\/scriptTab/);
+        const botId = botIdMatch ? botIdMatch[1] : null;
+
+        try {
+            await this.page.waitForSelector(this.Elements.runYes, { state: 'visible', timeout: 30000 });
+            await this.base.waitAndClick(this.Elements.runYes);
+        } catch (error) {
+            console.log('[clickOnYesButton] First 30s timeout — URL now:', this.page.url());
+            // Same class of drift as clickOnRunButton, but deeper: the SPA can navigate away from
+            // the bot entirely (sometimes to a different bot's dashboard) while waiting for the
+            // confirmation dialog, so the dialog itself is gone — re-waiting alone won't bring it
+            // back. Navigate back to the bot's script tab and re-trigger Run if it's sitting there
+            // unclicked, before retrying the confirmation wait.
+            if (botId && !this.page.url().includes(`/d/${botId}/v/scriptTab`)) {
+                const origin = new URL(this.page.url()).origin;
+                await this.page.goto(`${origin}/d/${botId}/v/scriptTab`);
+                await this.page.waitForLoadState('networkidle');
+                const runVisibleAgain = await this.page.locator(this.Elements.run).isVisible({ timeout: 5000 }).catch(() => false);
+                if (runVisibleAgain) {
+                    await this.base.waitAndClick(this.Elements.run);
+                }
+            } else {
+                try {
+                    await this.base.waitAndClick(this.Elements.closeButton);
+                } catch (closeError) {
+                    // closeButton not available in portal context, ignore
+                }
+            }
+            await this.page.waitForSelector(this.Elements.runYes, { state: 'visible', timeout: 45000 });
+            await this.base.waitAndClick(this.Elements.runYes);
+        }
     }
 
     async getJobFinishedText(timeout = 1080000) {

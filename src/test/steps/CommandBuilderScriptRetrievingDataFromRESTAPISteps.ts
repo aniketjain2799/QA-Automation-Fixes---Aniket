@@ -259,7 +259,7 @@ Then("the Bot1 script should be executed successfully, and the Worker-created ID
     const expectedValue19 = "no errors";
     expect(noErrorText19).toContain(expectedValue19);
 
-    this.bot1WorkerCreatedId = await commandBuilderRetrievingDataPage.extractWorkerCreatedId();
+    this.bot1WorkerCreatedId = await commandBuilderRetrievingDataPage.extractWorkerCreatedId(this.bot1ExecuteOldRunId);
     console.log(`Extracted Worker Created ID: ${this.bot1WorkerCreatedId}`);
 
     expect(this.bot1WorkerCreatedId).toBe(this.bot1ExecuteOldRunId);
@@ -300,7 +300,7 @@ Then("the Bot1 script should be executed successfully, and the Worker-created ID
     const jobFinishedText = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     expect(jobFinishedText).toContain("Job finished");
 
-    const workerCreatedId = await commandBuilderRetrievingDataPage.extractWorkerCreatedId();
+    const workerCreatedId = await commandBuilderRetrievingDataPage.extractWorkerCreatedId(this.bot1ExecuteGetRunId);
     console.log(`Worker Created ID: ${workerCreatedId}`);
 
     expect(workerCreatedId).toBe(this.bot1ExecuteGetRunId);
@@ -311,7 +311,7 @@ Then("the Bot1 script should be executed successfully, and the Worker-created ID
     const jobFinishedText = await commandBuilderRetrievingDataPage.getJobFinishedText(1080000);
     expect(jobFinishedText).toContain("Job finished");
 
-    const workerCreatedId = await commandBuilderRetrievingDataPage.extractWorkerCreatedId();
+    const workerCreatedId = await commandBuilderRetrievingDataPage.extractWorkerCreatedId(this.bot1ExecutePostFormRunId);
     console.log(`Worker Created ID: ${workerCreatedId}`);
 
     expect(workerCreatedId).toBe(this.bot1ExecutePostFormRunId);

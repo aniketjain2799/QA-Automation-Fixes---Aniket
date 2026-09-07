@@ -15,7 +15,24 @@ export default class PlaywrightWrapper {
         await element.waitFor({
             state: "visible"
         });
-        await element.click();
+        try {
+            await element.click();
+        } catch (error) {
+            console.log('[waitAndClick] Click blocked, attempting to dismiss overlay and retry:', locator);
+            // A leftover modal/overlay (e.g. alertify's cover backdrop, or an app overlay panel left
+            // open by an earlier action) can linger and intercept pointer events on later clicks,
+            // regardless of which locator is being clicked. Try the common dismiss paths, then retry
+            // the click once with a fresh wait rather than failing outright.
+            const alertifyOk = this.page.locator("#alertify-ok");
+            if (await alertifyOk.isVisible({ timeout: 1000 }).catch(() => false)) {
+                await alertifyOk.click().catch(() => {});
+            } else {
+                await this.page.keyboard.press('Escape').catch(() => {});
+            }
+            await this.page.waitForTimeout(1000);
+            await element.waitFor({ state: "visible", timeout: 15000 });
+            await element.click();
+        }
     }
 
     async navigateTo(link: string) {

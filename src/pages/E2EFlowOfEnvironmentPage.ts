@@ -54,7 +54,20 @@ export default class E2EFlowOfEnvironmentPage {
     }
 
     async clickOnShowExecutionLog() {
-        await this.base.waitAndClick(this.Elements.showExecutionLog);
+        // The execution log panel can open on its own (e.g. triggered by the preceding action)
+        // right as this click attempts to open it too, so a pre-click check for "already open"
+        // is racy — the panel can be closed at check time and opening by click time. Instead,
+        // try the click and only treat it as a real failure if the panel is still genuinely
+        // closed afterward; if it's open (by us or on its own), the goal is already achieved.
+        try {
+            await this.base.waitAndClick(this.Elements.showExecutionLog);
+        } catch (error) {
+            const panelOpen = await this.page.locator("//div[@id='rightPanelWrapper']//li").first().isVisible({ timeout: 2000 }).catch(() => false)
+                || await this.page.locator("//ul[@id='rightOverlayExecutionLogContainer']").isVisible({ timeout: 2000 }).catch(() => false);
+            if (!panelOpen) {
+                throw error;
+            }
+        }
     }
 
     async clickOnRestTCheckBox() {
