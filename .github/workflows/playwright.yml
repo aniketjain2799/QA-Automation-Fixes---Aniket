@@ -10,7 +10,7 @@ on:
 jobs:
   build:
     timeout-minutes: 360
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
 
