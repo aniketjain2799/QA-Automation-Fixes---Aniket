@@ -5,7 +5,7 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
-    workflow_dispatch: #
+  workflow_dispatch:
 
 jobs:
   build:
@@ -16,10 +16,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install node js v20
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
 
@@ -27,17 +27,17 @@ jobs:
         run: npm ci
 
       - name: Install Playwright browsers
-        run: npx playwright install
+        run: npx playwright install --with-deps
 
       - name: Debug Environment Variables
         run: |
           echo "Running tests with TAGS: @Regression"
-          export npm_config_TAGS="@Regression"
 
       - name: Run Cucumber tests with TAG
-        run: |
-          export npm_config_TAGS="@Regression"
-          SECRET_KEY=King1207# npm run test:staging -- --TAGS="@Regression"
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          npm_config_TAGS: "@Regression"
+        run: npm run test:staging -- --TAGS="@Regression"
 
       - name: Wait for job completion
         run: sleep 10s
@@ -54,20 +54,18 @@ jobs:
         if: always()
 
       - name: Upload Cucumber report as artifact
-        uses: actions/upload-artifact@v4.3.3
+        uses: actions/upload-artifact@v4
         with:
           name: cucumber-report
           path: test-results/cucumber-report.html
           if-no-files-found: error
         if: always()
 
-      
       - name: Generate artifact link
         id: artifact_link
-        run: echo "::set-output name=artifact_url::https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        run: echo "artifact_url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
         if: always()
 
-      
       - name: Send Teams notification
         run: |
           MESSAGE="Hi Team, Please find the latest Readibots WebAutomation Report for Stage environment.
@@ -75,7 +73,7 @@ jobs:
           1. Make sure you are logged into the Automation GitHub repository.
           2. Scroll to the bottom of the page.
           3. Click on 'Download report'.
-  
+
           Click on this link to access the artifact: [Download Report](${{ steps.artifact_link.outputs.artifact_url }})"
           curl -H 'Content-Type: application/json' -d '{
             "text": "'"$MESSAGE"'"
