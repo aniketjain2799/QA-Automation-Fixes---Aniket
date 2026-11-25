@@ -14,3 +14,4 @@ const password1 = "";
 
 const encryptedPassword1 = CryptoJS.AES.encrypt(password1, secretKey1).toString();
 console.log("Encrypted Password:", encryptedPassword1);
+console.log("");
